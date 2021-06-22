@@ -1,5 +1,6 @@
 import * as express from "express"
-import indexRouter from "./router/index"
+import redis from "./util/redis"
+redis.connect();
 
 class App {
   public application: express.Application;
@@ -11,15 +12,15 @@ class App {
 
 const app = new App().application;
 app.use(express.json())
-app.use('/', indexRouter);
-
 app.use('/', (req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.log(`[Path] ${req.method} ${req.path} [Param] ${JSON.stringify(req.body)}`);
   next();
 })
 
-// app.get("/", (req: express.Request, res: express.Response, next: express.NextFunction) => {
-//   res.send("Hello World");
-// });
+import indexRouter from "./router/index"
+import pageRouter from "./router/page"
+
+app.use('/', indexRouter);
+app.use('/page', pageRouter);
 
 export default app;
