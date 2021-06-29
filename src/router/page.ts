@@ -1,4 +1,5 @@
 import * as express from "express"
+import { Page } from '../database/models/Page'
 import redis from "../util/redis"
 const redisClient = redis.getInstance();
 
@@ -16,6 +17,9 @@ router.post('/',
         rData.timestamp = Date.now();
         redisClient.RPUSH('crawling_list', JSON.stringify(rData));
         
+        //const page = Page.build(req.body);
+        //await page.save();
+
         res.status(200).json({result: 'success'});
 });
 

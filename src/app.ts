@@ -1,6 +1,4 @@
 import * as express from "express"
-import redis from "./util/redis"
-redis.connect();
 
 class App {
   public application: express.Application;
