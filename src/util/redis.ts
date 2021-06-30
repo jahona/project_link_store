@@ -1,8 +1,8 @@
-import * as RedisInst from "redis"
+import * as redis from "redis"
 import * as _ from "lodash"
 
 export default class RedisClient {
-  private static _redis: RedisInst.RedisClient;
+  private static _redis: redis.RedisClient;
 
   public static connect(options: any = {}) {
     const opts = _.extend({
@@ -20,7 +20,7 @@ export default class RedisClient {
       console.log(`[Info] exist connected redis`);
     } else {
       console.log(`[Info] try to connect redis, redis Info = ${JSON.stringify(opts.options)}`);
-      this._redis = RedisInst.createClient(opts.options);
+      this._redis = redis.createClient(opts.options);
     }
 
     this._redis.on('connect', () => {

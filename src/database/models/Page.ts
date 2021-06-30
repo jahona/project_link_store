@@ -44,6 +44,10 @@ export class Page extends Model {
   @Column(DataType.STRING)
   words: string;
 
+  @AllowNull
+  @Column(DataType.DATE)
+  praseCompleteDate: Date;
+
   @CreatedAt
   createDate: Date;
 
