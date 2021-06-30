@@ -1,7 +1,6 @@
 import * as express from "express"
 import { Page } from '../database/models/Page'
 import redis from "../util/redis"
-const redisClient = redis.getInstance();
 
 const router = express.Router();
 
@@ -12,6 +11,7 @@ router.get('/',
 
 router.post('/', 
     async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        const redisClient = redis.getInstance();
         const rData: any = {};
         rData.link = req.body.link;
         rData.timestamp = Date.now();
