@@ -1,5 +1,6 @@
 import * as request from 'request';
 import { URL } from 'url';
+const Article = require('newspaperjs').Article
 
 export const get = (uri: string) => {
   return new Promise((resolve, reject) => {
@@ -40,8 +41,14 @@ function _get (uri: string, cb: Function) {
 
       if (checkRobotsPolicy(info)) {
         console.log(`[Debug] Try to Site Crawling uri: ${uri} `)
-        // TODO: crawling
-        cb(null, 'access');
+        
+        crawling(uri, (err: any, result: string) => {
+          if (err) {
+            cb(err);
+          } else {
+            cb(null, result);
+          }
+        });
       } else {
         console.log(`[Debug] Denied From Site uri: ${uri}`)
         cb(null, 'deny');
@@ -165,5 +172,26 @@ function checkAllowedPath(srcPath: string, allowPath: string) {
     return srcPath.substring(0, len2) === allowPath;
   } else {
     return false;
+  }
+}
+
+// newspaper npm module interface
+interface newspaperInterface {
+  title: string;
+  text: string;
+  topImage: string;
+  date: string;
+  author: string;
+  description: string;
+  keywords: Array<string>;
+}
+
+async function crawling(uri: String, cb: Function) {
+  try {
+    let res: newspaperInterface = await Article(uri);
+    
+    cb(null, res);
+  } catch (err) {
+    cb(err);
   }
 }

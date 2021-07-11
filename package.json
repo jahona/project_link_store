@@ -33,6 +33,7 @@
     "lodash": "^4.17.21",
     "mariadb": "^2.5.3",
     "mysql2": "^2.2.5",
+    "newspaperjs": "^1.0.8",
     "redis": "^3.1.2",
     "reflect-metadata": "^0.1.13",
     "request": "^2.88.2",
