@@ -2,15 +2,13 @@ import * as request from 'request';
 import { URL } from 'url';
 const Article = require('newspaperjs').Article
 
-export const get = (uri: string) => {
+export const fetchArticle = (uri: string) => {
   return new Promise((resolve, reject) => {
-    _get(uri, (err: any, result: string) => {
+    _get(uri, (err: any, result: any) => {
       if (err) {
         reject(err);
       } else {
-        resolve({
-          result: result
-        });
+        resolve(result);
       }
     });
   });
@@ -42,7 +40,7 @@ function _get (uri: string, cb: Function) {
       if (checkRobotsPolicy(info)) {
         console.log(`[Debug] Try to Site Crawling uri: ${uri} `)
         
-        crawling(uri, (err: any, result: string) => {
+        crawling(uri, (err: any, result: newspaperInterface) => {
           if (err) {
             cb(err);
           } else {

@@ -1,9 +1,32 @@
-import * as express from "express"
+import * as express from 'express'
 import { Page } from '../database/models/Page'
 import RedisClient from "../util/redis"
+import got from 'got';
+import { fetchArticle } from '../util/siteCrawling';
 
-const publisher = new RedisClient().getInstance();
+const redisClient = new RedisClient().getInstance();
 const router = express.Router();
+
+redisClient.on('insert-crawling-queue', (data) => {
+    redisClient.RPUSH('crawling-queue', JSON.stringify(data));
+    redisClient.publish('event-page', 'insert');
+})
+
+// TODO: RedisClient 분리
+const subscriber = new RedisClient().getInstance();
+subscriber.subscribe('event-page');
+subscriber.on('message', async (channel, message) => {
+    if (channel === 'event-page') {
+        if (message === 'insert') {
+            try {
+                const response = await got.post('http://localhost:3000/page/run');
+                console.log(response.body);
+            } catch (error) {
+                console.log(error.response.body);
+            }            
+        }
+    }    
+})
 
 router.get('/', 
     async (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -21,71 +44,45 @@ router.post('/',
         rData.linkId = page.id;
         rData.timestamp = Date.now();
 
-        publisher.RPUSH('page-queue', JSON.stringify(rData), (err, reply) => {
-            if (err) {
-                console.log(`[Error][RedisClient][save] Redis Err: ${err}`);
-            } else {
-                console.log(`[Debug][RedisClient][save] Remained Count: ${JSON.stringify(reply)}`);
-                publisher.emit('page-event', 'insert');
-            }
-        });
-            
+        redisClient.emit('insert-crawling-queue', rData);
+    
         res.status(200).json({result: 'success', linkId: page.id});
 });
 
-publisher.on('page-event', function(message) {
-    console.log("Subscriber received message in message '" + message);
-    // redisClient.LPOP
-    publisher.emit('queue_pop', 'page-queue');
-    // const multi = redisClient.multi();
-    /*
-      큐에서 10개만 가져오기
-      TODO: Config 정보로 빼기
-    */
-    // multi.LRANGE('page-queue', 0, 9);
-    // multi.LTRIM('page-queue', 9, -1);
-    // multi.exec(async (err, reply) => {
-    //   if (err) {
-    //     console.log(`[Error][Event][queue_run_prase] Redis Err: ${err}`);
-    //   } else {
-    //     console.log(`[Debug][Event][queue_run_prase] channel: ${channel}, reply: ${reply[0]}`);
-
-    //     // const ldata = reply[0];
-    //     // for (let idx in ldata) {
-    //     //   const data = JSON.parse(ldata[idx]);
-    //     //   console.log(`[Info][Event][queue_run_prase] Strarting Crawling... ${JSON.stringify(data)}`);
-
-    //     //   // TODO: Implement Crawling
-
-    //     //   await Page.update({
-    //     //     praseCompleteDate: Date.now()
-    //     //   }, {
-    //     //     where: {
-    //     //       id: data.linkId
-    //     //     }
-    //     //   });
-    //     // }
-    //   }
-    // })
-  });
-    
-  publisher.on('queue_pop', (channel) => {
-    console.log(`[Debug][Event][queue_pop] channel: ${channel}`)
-    publisher.LPOP(channel, (err, data) => {
-      if (err) {
-        console.log(`[Error][Event][queue_pop] Redis Err: ${err}`);
-      } else {
-        console.log(`[Debug][Event][queue_pop] channel: ${channel}, data: ${JSON.stringify(data)}`)
-      }
-    });
-  });
-
-// router.post('/pull', 
-//     async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-//         const redisClient = Redis.getInstance();
-//         redisClient.emit('queue_run_prase', 'crawling_list');
+router.post('/run',
+    async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        const multi = redisClient.multi();
         
-//         res.status(200).json({result: 'success'});
-// });
+        multi.LRANGE('crawling-queue', 0, 9);
+        multi.LTRIM('crawling-queue', 9, -1);
+        multi.exec(async (err, reply) => {
+        if (err) {
+            console.log(`[Error] Redis Err: ${err}`);
+        } else {
+            console.log(`[Debug] channel: 'insert-crawling-queue', reply: ${reply[0]}`);
+
+            const ldata = reply[0];
+            for (let idx in ldata) {
+                const data = JSON.parse(ldata[idx]);
+                console.log(`[Info][Event][queue_run_prase] Strarting Crawling... ${JSON.stringify(data)}`);
+                
+                const result: any = await fetchArticle(data.link);
+
+                await Page.update({
+                    title: result.title,
+                    content: result.description,
+                    words: result.keywords,
+                    praseCompleteDate: Date.now()
+                }, {
+                    where: {
+                        id: data.linkId
+                    }
+                });
+            }
+
+            res.status(200).json({result: 'success'});
+        }
+    });
+});
 
 export default router;
