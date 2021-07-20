@@ -94,6 +94,7 @@ router.post('/run',
                             title: result.title,
                             content: result.description,
                             words: JSON.stringify(result.keywords),
+                            thumbnail: result.topImage,
                             valid: 1,
                             praseCompleteDate: Date.now()
                         }, {

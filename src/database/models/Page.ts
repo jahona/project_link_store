@@ -45,6 +45,10 @@ export class Page extends Model {
   words: string;
 
   @AllowNull
+  @Column(DataType.STRING)
+  thumbnail: string;
+
+  @AllowNull
   @Column(DataType.DATE)
   praseCompleteDate: Date;
 
