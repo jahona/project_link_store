@@ -93,7 +93,7 @@ router.post('/run',
                         await Page.update({
                             title: result.title,
                             content: result.description,
-                            words: result.keywords,
+                            words: JSON.stringify(result.keywords),
                             valid: 1,
                             praseCompleteDate: Date.now()
                         }, {
