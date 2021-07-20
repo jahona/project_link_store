@@ -48,6 +48,9 @@ export class Page extends Model {
   @Column(DataType.DATE)
   praseCompleteDate: Date;
 
+  @Column(DataType.BOOLEAN)
+  valid: boolean;
+
   @CreatedAt
   createDate: Date;
 

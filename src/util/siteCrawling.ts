@@ -15,9 +15,17 @@ export const fetchArticle = (uri: string) => {
 }
 
 function _get (uri: string, cb: Function) {
-  const protocol = extractProtocol(uri).toLowerCase();
-  const domain = extractDomain(uri).toLowerCase();
-  const urlPath = extractPath(uri).toLowerCase();
+  let protocol, domain, urlPath: string;
+  
+  try {
+    const inst = new URL(uri);
+    domain = inst.hostname.toLowerCase();
+    protocol = inst.protocol.toLowerCase();
+    urlPath = inst.pathname.toLowerCase();
+  } catch (err) {
+    return cb(err);
+  }
+
   const robotsUri = protocol + '//' + domain + '/robots.txt';
 
   console.log(`[Info] domain: ${robotsUri}, Checking File : robots.txt...`)
@@ -54,18 +62,6 @@ function _get (uri: string, cb: Function) {
     }
   });
 };
-
-function extractDomain(uri: string) {
-  return new URL(uri).hostname;
-}
-
-function extractProtocol(uri: string) {
-  return new URL(uri).protocol;
-}
-
-function extractPath(uri: string) {
-  return new URL(uri).pathname;
-}
 
 /*
 True: 로봇 정책 허용

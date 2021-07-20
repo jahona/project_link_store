@@ -33,10 +33,26 @@ router.get('/',
         res.send('/');
 });
 
+function isValidURL(uri: string) {
+    let url;
+    
+    try {
+        url = new URL(uri);
+    } catch (_) {
+        return false;  
+    }
+    
+    return url.protocol === "http:" || url.protocol === "https:"; 
+}
+
 router.post('/', 
     async (req: express.Request, res: express.Response, next: express.NextFunction) => {
         const rData: any = {};
-            
+        
+        if (!isValidURL(req.body.link)) {
+            return res.status(200).json({result: 'fail', message: 'Invalid URL'});
+        }
+
         const page = Page.build(req.body);
         await page.save();
 
@@ -66,18 +82,36 @@ router.post('/run',
                 const data = JSON.parse(ldata[idx]);
                 console.log(`[Info][Event][queue_run_prase] Strarting Crawling... ${JSON.stringify(data)}`);
                 
-                const result: any = await fetchArticle(data.link);
+                let result: any;
 
-                await Page.update({
-                    title: result.title,
-                    content: result.description,
-                    words: result.keywords,
-                    praseCompleteDate: Date.now()
-                }, {
-                    where: {
-                        id: data.linkId
+                try {
+                    result = await fetchArticle(data.link);
+                } catch (err) {
+                    console.log(`[Error] Err: ${err}`);
+                } finally {
+                    if (result) {
+                        await Page.update({
+                            title: result.title,
+                            content: result.description,
+                            words: result.keywords,
+                            valid: 1,
+                            praseCompleteDate: Date.now()
+                        }, {
+                            where: {
+                                id: data.linkId
+                            }
+                        });
+                    } else {
+                        await Page.update({
+                            valid: 0,
+                            praseCompleteDate: Date.now()
+                        }, {
+                            where: {
+                                id: data.linkId
+                            }
+                        });
                     }
-                });
+                }      
             }
 
             res.status(200).json({result: 'success'});
