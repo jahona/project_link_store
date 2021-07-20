@@ -1,0 +1,19 @@
+.input-link-main {
+  margin-top: 7%;
+  padding-left: 5%;
+  padding-right: 5%;
+  height: 300px;
+}
+
+.input-link-main__inputBox {
+  height: 50px;
+}
+
+.input-link-main__inputBox--input {
+  border: 1px solid #ccccc8
+}
+
+.input-link-main__inputBox--btn {
+    border-color: #a1a1a0;
+    border: 1px solid #ccccc8
+}
