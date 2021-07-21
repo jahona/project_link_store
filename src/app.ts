@@ -26,8 +26,10 @@ app.use('/', (req: express.Request, res: express.Response, next: express.NextFun
 
 import indexRouter from "./router/index"
 import pageRouter from "./router/page"
+import authRouter from "./router/auth"
 
 app.use('/', indexRouter);
 app.use('/page', pageRouter);
+app.use('/authentication', authRouter);
 
 export default app;

@@ -18,43 +18,20 @@ import {
 } from 'sequelize-typescript';
 
 @Table({
-  tableName: 'Page',
+  tableName: 'User',
   underscored: true,
   paranoid: true,
 })
-export class Page extends Model {
+export class User extends Model {
   @PrimaryKey
   @AutoIncrement
   @AllowNull(false)
   @Column(DataType.INTEGER({ scale: 11 }).UNSIGNED)
   id: number;
 
-  @AllowNull
+  @AllowNull(false)
   @Column(DataType.STRING)
-  link: string;
-
-  @AllowNull
-  @Column(DataType.STRING)
-  title: string;
-
-  @AllowNull
-  @Column(DataType.STRING)
-  content: string;
-
-  @AllowNull
-  @Column(DataType.STRING)
-  words: string;
-
-  @AllowNull
-  @Column(DataType.STRING)
-  thumbnail: string;
-
-  @AllowNull
-  @Column(DataType.DATE)
-  praseCompleteDate: Date;
-
-  @Column(DataType.BOOLEAN)
-  valid: boolean;
+  userKey: string;
 
   @CreatedAt
   createDate: Date;

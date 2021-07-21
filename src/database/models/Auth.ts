@@ -18,43 +18,28 @@ import {
 } from 'sequelize-typescript';
 
 @Table({
-  tableName: 'Page',
+  tableName: 'Auth',
   underscored: true,
   paranoid: true,
 })
-export class Page extends Model {
+export class Auth extends Model {
   @PrimaryKey
-  @AutoIncrement
   @AllowNull(false)
-  @Column(DataType.INTEGER({ scale: 11 }).UNSIGNED)
-  id: number;
-
-  @AllowNull
   @Column(DataType.STRING)
-  link: string;
+  userKey: string;
 
-  @AllowNull
+  @AllowNull(false)
   @Column(DataType.STRING)
-  title: string;
+  secret: string;
 
-  @AllowNull
-  @Column(DataType.STRING)
-  content: string;
-
-  @AllowNull
-  @Column(DataType.STRING)
-  words: string;
-
-  @AllowNull
-  @Column(DataType.STRING)
-  thumbnail: string;
-
-  @AllowNull
+  @AllowNull(false)
   @Column(DataType.DATE)
-  praseCompleteDate: Date;
+  lastLoginTimestamp: Date;
 
+  @AllowNull(false)
+  @Default(0)
   @Column(DataType.BOOLEAN)
-  valid: boolean;
+  expired: boolean;
 
   @CreatedAt
   createDate: Date;
