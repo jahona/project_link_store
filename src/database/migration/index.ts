@@ -9,5 +9,5 @@ console.log(`======Migration DB======`);
 
   await db.sync();
 
-  // await db.close();
+  await db.close();
 })();

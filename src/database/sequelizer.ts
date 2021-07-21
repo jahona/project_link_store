@@ -46,9 +46,9 @@ class SequelizeManager {
 		console.log(`DB Disconnecting ...`);
 
 		if (_config.DB_USE) {
-			this._db.map(function(elem) {
-				elem.close();
-			});
+			for (let i=0 ; i<this._db.length ; i++) {
+				await this._db[i].close();
+			}
 		}
 	}
 
@@ -56,9 +56,19 @@ class SequelizeManager {
 		console.log(`DB Sync ...`);
 
 		if (_config.DB_USE) {
-			this._db.map(function(elem) {
-				elem.sync();
-			});
+			for (let i=0 ; i<this._db.length ; i++) {
+				await this._db[i].sync({alter: true});
+			}
+		}
+	}
+
+	async force() {
+		console.log(`DB Sync (force)...`);
+
+		if (_config.DB_USE) {
+			for (let i=0 ; i<this._db.length ; i++) {
+				await this._db[i].sync({force: true});
+			}
 		}
 	}
 }
